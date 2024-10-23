@@ -55,13 +55,45 @@ public class FireShell : MonoBehaviour {
     //        return null;
     //}
 
+    void RotateTurret()
+    {
+        float? angle = CalculateAngle(true);
 
+        if (angle != null)
+        {
+            turretBase.localEulerAngles = new Vector3(360f - (float)angle, 0, 0);
+        }
+    }
+
+    float? CalculateAngle(bool low)
+    {
+        Vector3 targetDir = enemy.transform.position - transform.position;
+        float y = targetDir.y;
+        targetDir.y = 0.0f;
+        float x = targetDir.magnitude - 1.0f;
+        float gravity = 9.8f;
+        float sSqr = speed * speed;
+        float underTheSqrRoot = (sSqr * sSqr) - gravity * (gravity * x * x + 2 * y * sSqr);
+
+        if (underTheSqrRoot >= 0.0f)
+        {
+            float root = Mathf.Sqrt(underTheSqrRoot);
+            float highAngle = sSqr + root;
+            float lowAngle = sSqr - root;
+
+            if (low) return (Mathf.Atan2(lowAngle, gravity * x) * Mathf.Rad2Deg);
+            else return (Mathf.Atan2(highAngle, gravity * x) * Mathf.Rad2Deg);
+        }
+        else
+            return null;
+    }
 
     void Update() {
 
         Vector3 direction = enemy.transform.position - transform.position;
         Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotSpeed);
+        RotateTurret();
         if (Input.GetKeyDown(KeyCode.Space))
         {
             CreateBullet();
