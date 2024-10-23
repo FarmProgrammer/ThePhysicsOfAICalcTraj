@@ -16,6 +16,9 @@ public class FireShell : MonoBehaviour {
     static float delayReset = 0.2f;
     float delay = delayReset;
 
+    private bool canFire = true;
+    public float fireRate = 0.1f;
+
     void CreateBullet()
     {
         //GameObject shell = Instantiate(bullet, turret.transform.position, turret.transform.rotation);
@@ -91,6 +94,12 @@ public class FireShell : MonoBehaviour {
             return null;
     }
 
+    IEnumerator ResetFire()
+    {
+        yield return new WaitForSeconds(fireRate);
+        canFire = true;
+    }
+
     void Update() {
 
         Vector3 direction = enemy.transform.position - transform.position;
@@ -99,7 +108,12 @@ public class FireShell : MonoBehaviour {
         float? angle = RotateTurret();
         if (angle!=null)
         {
-            CreateBullet();
+            if (canFire)
+            {
+                CreateBullet();
+                canFire = false;
+                StartCoroutine(ResetFire());
+            }
         }
         else
         {
