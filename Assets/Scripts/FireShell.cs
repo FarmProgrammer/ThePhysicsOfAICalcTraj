@@ -18,8 +18,10 @@ public class FireShell : MonoBehaviour {
 
     void CreateBullet()
     {
-        GameObject shell = Instantiate(bullet, turret.transform.position, turret.transform.rotation);
-        shell.GetComponent<Rigidbody>().velocity = speed * turretBase.forward;
+        //GameObject shell = Instantiate(bullet, turret.transform.position, turret.transform.rotation);
+        //shell.GetComponent<Rigidbody>().velocity = speed * turretBase.forward;
+        GameObject boomBarrel = Instantiate(bullet, turret.transform.position, turret.transform.rotation);
+        boomBarrel.GetComponent<Rigidbody>().velocity = speed * turretBase.forward;
     }
 
     //float? RotateTurret() {
@@ -55,14 +57,15 @@ public class FireShell : MonoBehaviour {
     //        return null;
     //}
 
-    void RotateTurret()
+    float? RotateTurret()
     {
-        float? angle = CalculateAngle(true);
+        float? angle = CalculateAngle(false);
 
         if (angle != null)
         {
             turretBase.localEulerAngles = new Vector3(360f - (float)angle, 0, 0);
         }
+        return angle;
     }
 
     float? CalculateAngle(bool low)
@@ -93,10 +96,14 @@ public class FireShell : MonoBehaviour {
         Vector3 direction = enemy.transform.position - transform.position;
         Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotSpeed);
-        RotateTurret();
-        if (Input.GetKeyDown(KeyCode.Space))
+        float? angle = RotateTurret();
+        if (angle!=null)
         {
             CreateBullet();
+        }
+        else
+        {
+            transform.Translate(0, 0, Time.deltaTime * moveSpeed);
         }
     }
 
